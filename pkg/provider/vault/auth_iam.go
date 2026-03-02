@@ -107,7 +107,7 @@ func (c *client) requestTokenWithIamAuth(ctx context.Context, iamAuth *esv1.Vaul
 		stsclient := assumeRoler(sess)
 		if iamAuth.ExternalID != "" {
 			var setExternalID = func(p *stscreds.AssumeRoleProvider) {
-				p.ExternalID = aws.String(iamAuth.ExternalID)
+				p.ExternalID = new(iamAuth.ExternalID)
 			}
 			sess.Config.WithCredentials(stscreds.NewCredentialsWithClient(stsclient, iamAuth.AWSIAMRole, setExternalID))
 		} else {

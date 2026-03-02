@@ -40,7 +40,7 @@ var (
 
 // ExternalSecret type metadata.
 var (
-	ExtSecretKind             = reflect.TypeOf(ExternalSecret{}).Name()
+	ExtSecretKind             = reflect.TypeFor[ExternalSecret]().Name()
 	ExtSecretGroupKind        = schema.GroupKind{Group: Group, Kind: ExtSecretKind}.String()
 	ExtSecretKindAPIVersion   = ExtSecretKind + "." + SchemeGroupVersion.String()
 	ExtSecretGroupVersionKind = SchemeGroupVersion.WithKind(ExtSecretKind)
@@ -48,7 +48,7 @@ var (
 
 // ClusterExternalSecret type metadata.
 var (
-	ClusterExtSecretKind             = reflect.TypeOf(ClusterExternalSecret{}).Name()
+	ClusterExtSecretKind             = reflect.TypeFor[ClusterExternalSecret]().Name()
 	ClusterExtSecretGroupKind        = schema.GroupKind{Group: Group, Kind: ClusterExtSecretKind}.String()
 	ClusterExtSecretKindAPIVersion   = ClusterExtSecretKind + "." + SchemeGroupVersion.String()
 	ClusterExtSecretGroupVersionKind = SchemeGroupVersion.WithKind(ClusterExtSecretKind)
@@ -56,7 +56,7 @@ var (
 
 // SecretStore type metadata.
 var (
-	SecretStoreKind             = reflect.TypeOf(SecretStore{}).Name()
+	SecretStoreKind             = reflect.TypeFor[SecretStore]().Name()
 	SecretStoreGroupKind        = schema.GroupKind{Group: Group, Kind: SecretStoreKind}.String()
 	SecretStoreKindAPIVersion   = SecretStoreKind + "." + SchemeGroupVersion.String()
 	SecretStoreGroupVersionKind = SchemeGroupVersion.WithKind(SecretStoreKind)
@@ -64,7 +64,7 @@ var (
 
 // ClusterSecretStore type metadata.
 var (
-	ClusterSecretStoreKind             = reflect.TypeOf(ClusterSecretStore{}).Name()
+	ClusterSecretStoreKind             = reflect.TypeFor[ClusterSecretStore]().Name()
 	ClusterSecretStoreGroupKind        = schema.GroupKind{Group: Group, Kind: ClusterSecretStoreKind}.String()
 	ClusterSecretStoreKindAPIVersion   = ClusterSecretStoreKind + "." + SchemeGroupVersion.String()
 	ClusterSecretStoreGroupVersionKind = SchemeGroupVersion.WithKind(ClusterSecretStoreKind)

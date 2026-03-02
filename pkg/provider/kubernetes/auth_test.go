@@ -25,7 +25,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/rest"
-	pointer "k8s.io/utils/ptr"
 	kclient "sigs.k8s.io/controller-runtime/pkg/client"
 	fclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 
@@ -136,7 +135,7 @@ func TestSetAuth(t *testing.T) {
 						Token: &esv1.TokenAuth{
 							BearerToken: v1.SecretKeySelector{
 								Name:      "foobar",
-								Namespace: pointer.To("shouldnotberelevant"),
+								Namespace: new("shouldnotberelevant"),
 								Key:       "token",
 							},
 						},
@@ -186,7 +185,7 @@ func TestSetAuth(t *testing.T) {
 						Token: &esv1.TokenAuth{
 							BearerToken: v1.SecretKeySelector{
 								Name:      "foobar",
-								Namespace: pointer.To("shouldnotberelevant"),
+								Namespace: new("shouldnotberelevant"),
 								Key:       "token",
 							},
 						},
@@ -224,7 +223,7 @@ func TestSetAuth(t *testing.T) {
 						Token: &esv1.TokenAuth{
 							BearerToken: v1.SecretKeySelector{
 								Name:      "foobar",
-								Namespace: pointer.To("shouldnotberelevant"),
+								Namespace: new("shouldnotberelevant"),
 								Key:       "token",
 							},
 						},
@@ -302,7 +301,7 @@ func TestSetAuth(t *testing.T) {
 					Auth: &esv1.KubernetesAuth{
 						ServiceAccount: &v1.ServiceAccountSelector{
 							Name:      "my-sa",
-							Namespace: pointer.To("shouldnotberelevant"),
+							Namespace: new("shouldnotberelevant"),
 						},
 					},
 				},
@@ -334,7 +333,7 @@ func TestSetAuth(t *testing.T) {
 					Auth: &esv1.KubernetesAuth{
 						ServiceAccount: &v1.ServiceAccountSelector{
 							Name:      "my-sa",
-							Namespace: pointer.To("shouldnotberelevant"),
+							Namespace: new("shouldnotberelevant"),
 						},
 					},
 				},
@@ -358,7 +357,7 @@ func TestSetAuth(t *testing.T) {
 				store: &esv1.KubernetesProvider{
 					AuthRef: &v1.SecretKeySelector{
 						Name:      "foobar",
-						Namespace: pointer.To("default"),
+						Namespace: new("default"),
 						Key:       "config",
 					},
 				},

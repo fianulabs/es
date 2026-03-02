@@ -92,7 +92,7 @@ type secretResponseBody struct {
 	Value struct {
 		Raw      *string `json:"raw"`
 		Computed *string `json:"computed"`
-	} `json:"value,omitempty"`
+	} `json:"value"`
 	Messages *[]string `json:"messages,omitempty"`
 	Success  bool      `json:"success"`
 }

@@ -32,7 +32,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/ptr"
 
 	esv1 "github.com/external-secrets/external-secrets/apis/externalsecrets/v1"
 	fakeps "github.com/external-secrets/external-secrets/pkg/provider/aws/parameterstore/fake"
@@ -625,8 +624,8 @@ func TestPushSecret(t *testing.T) {
 					DescribeParametersFn: fakeps.NewDescribeParametersFn(&ssm.DescribeParametersOutput{}, nil),
 					ListTagsForResourceFn: fakeps.NewListTagsForResourceFn(&ssm.ListTagsForResourceOutput{
 						TagList: []ssmtypes.Tag{managedByESO,
-							{Key: ptr.To("team"), Value: ptr.To("no-longer-needed")},
-							{Key: ptr.To("rotation"), Value: ptr.To("10m")},
+							{Key: new("team"), Value: new("no-longer-needed")},
+							{Key: new("rotation"), Value: new("10m")},
 						},
 					}, nil),
 					RemoveTagsFromResourceFn: fakeps.NewRemoveTagsFromResourceFn(&ssm.RemoveTagsFromResourceOutput{}, nil, func(input *ssm.RemoveTagsFromResourceInput) {
@@ -636,8 +635,8 @@ func TestPushSecret(t *testing.T) {
 					AddTagsToResourceFn: fakeps.NewAddTagsToResourceFn(&ssm.AddTagsToResourceOutput{}, nil, func(input *ssm.AddTagsToResourceInput) {
 						assert.Len(t, input.Tags, 3)
 						assert.Contains(t, input.Tags, ssmtypes.Tag{Key: &managedBy, Value: &externalSecrets})
-						assert.Contains(t, input.Tags, ssmtypes.Tag{Key: ptr.To("env"), Value: ptr.To("sandbox")})
-						assert.Contains(t, input.Tags, ssmtypes.Tag{Key: ptr.To("rotation"), Value: ptr.To("1h")})
+						assert.Contains(t, input.Tags, ssmtypes.Tag{Key: new("env"), Value: new("sandbox")})
+						assert.Contains(t, input.Tags, ssmtypes.Tag{Key: new("rotation"), Value: new("1h")})
 					}),
 				},
 			},
@@ -1226,8 +1225,8 @@ func TestComputeTagsToUpdate(t *testing.T) {
 				"key2": "value2",
 			},
 			expected: []ssmtypes.Tag{
-				{Key: ptr.To("key1"), Value: ptr.To("value1")},
-				{Key: ptr.To("key2"), Value: ptr.To("value2")},
+				{Key: new("key1"), Value: new("value1")},
+				{Key: new("key2"), Value: new("value2")},
 			},
 			modified: false,
 		},
@@ -1243,9 +1242,9 @@ func TestComputeTagsToUpdate(t *testing.T) {
 				managedBy: externalSecrets,
 			},
 			expected: []ssmtypes.Tag{
-				{Key: ptr.To("key1"), Value: ptr.To("value1")},
-				{Key: ptr.To("key2"), Value: ptr.To("value2")},
-				{Key: ptr.To(managedBy), Value: ptr.To(externalSecrets)},
+				{Key: new("key1"), Value: new("value1")},
+				{Key: new("key2"), Value: new("value2")},
+				{Key: new(managedBy), Value: new(externalSecrets)},
 			},
 			modified: false,
 		},
@@ -1259,8 +1258,8 @@ func TestComputeTagsToUpdate(t *testing.T) {
 				"key2": "value2",
 			},
 			expected: []ssmtypes.Tag{
-				{Key: ptr.To("key1"), Value: ptr.To("value1")},
-				{Key: ptr.To("key2"), Value: ptr.To("value2")},
+				{Key: new("key1"), Value: new("value1")},
+				{Key: new("key2"), Value: new("value2")},
 			},
 			modified: true,
 		},
@@ -1273,7 +1272,7 @@ func TestComputeTagsToUpdate(t *testing.T) {
 				"key1": "newValue",
 			},
 			expected: []ssmtypes.Tag{
-				{Key: ptr.To("key1"), Value: ptr.To("newValue")},
+				{Key: new("key1"), Value: new("newValue")},
 			},
 			modified: true,
 		},
@@ -1291,7 +1290,7 @@ func TestComputeTagsToUpdate(t *testing.T) {
 				"key1": "value1",
 			},
 			expected: []ssmtypes.Tag{
-				{Key: ptr.To("key1"), Value: ptr.To("value1")},
+				{Key: new("key1"), Value: new("value1")},
 			},
 			modified: true,
 		},

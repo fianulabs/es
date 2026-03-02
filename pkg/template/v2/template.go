@@ -19,6 +19,7 @@ package template
 import (
 	"bytes"
 	"fmt"
+	"maps"
 	tpl "text/template"
 
 	"github.com/Masterminds/sprig/v3"
@@ -76,9 +77,7 @@ func init() {
 	delete(sprigFuncs, "env")
 	delete(sprigFuncs, "expandenv")
 
-	for k, v := range sprigFuncs {
-		tplFuncs[k] = v
-	}
+	maps.Copy(tplFuncs, sprigFuncs)
 	fs := pflag.NewFlagSet("template", pflag.ExitOnError)
 	fs.StringVar(&leftDelim, "template-left-delimiter", "{{", "templating left delimiter")
 	fs.StringVar(&rightDelim, "template-right-delimiter", "}}", "templating right delimiter")

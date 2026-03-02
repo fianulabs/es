@@ -17,6 +17,7 @@ limitations under the License.
 package fakes
 
 import (
+	"maps"
 	"sync"
 
 	"github.com/external-secrets/external-secrets/apis/externalsecrets/v1"
@@ -100,9 +101,7 @@ func (fake *PushRemoteRef) Invocations() map[string][][]any {
 	fake.getRemoteKeyMutex.RLock()
 	defer fake.getRemoteKeyMutex.RUnlock()
 	copiedInvocations := map[string][][]any{}
-	for key, value := range fake.invocations {
-		copiedInvocations[key] = value
-	}
+	maps.Copy(copiedInvocations, fake.invocations)
 	return copiedInvocations
 }
 

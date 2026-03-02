@@ -17,6 +17,8 @@ limitations under the License.
 package metrics
 
 import (
+	"maps"
+
 	"github.com/prometheus/client_golang/prometheus"
 	v1 "k8s.io/api/core/v1"
 
@@ -32,9 +34,7 @@ func UpdateStatusCondition(ss esapi.GenericStore, condition esapi.SecretStoreSta
 	ssInfo := make(map[string]string)
 	ssInfo["name"] = ss.GetName()
 	ssInfo["namespace"] = ss.GetNamespace()
-	for k, v := range ss.GetLabels() {
-		ssInfo[k] = v
-	}
+	maps.Copy(ssInfo, ss.GetLabels())
 	conditionLabels := ctrlmetrics.RefineConditionMetricLabels(ssInfo)
 	secretStoreCondition := gaugeVecGetter(StatusConditionKey)
 

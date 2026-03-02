@@ -39,14 +39,14 @@ var (
 )
 
 var (
-	PushSecretKind             = reflect.TypeOf(PushSecret{}).Name()
+	PushSecretKind             = reflect.TypeFor[PushSecret]().Name()
 	PushSecretGroupKind        = schema.GroupKind{Group: Group, Kind: PushSecretKind}.String()
 	PushSecretKindAPIVersion   = PushSecretKind + "." + SchemeGroupVersion.String()
 	PushSecretGroupVersionKind = SchemeGroupVersion.WithKind(PushSecretKind)
 )
 
 var (
-	ClusterPushSecretKind             = reflect.TypeOf(ClusterPushSecret{}).Name()
+	ClusterPushSecretKind             = reflect.TypeFor[ClusterPushSecret]().Name()
 	ClusterPushSecretGroupKind        = schema.GroupKind{Group: Group, Kind: ClusterPushSecretKind}.String()
 	ClusterPushSecretKindAPIVersion   = ClusterPushSecretKind + "." + SchemeGroupVersion.String()
 	ClusterPushSecretGroupVersionKind = SchemeGroupVersion.WithKind(ClusterPushSecretKind)

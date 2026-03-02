@@ -37,7 +37,6 @@ import (
 	github "github.com/google/go-github/v56/github"
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/utils/ptr"
 
 	esv1 "github.com/external-secrets/external-secrets/apis/externalsecrets/v1"
 	esv1alpha1 "github.com/external-secrets/external-secrets/apis/externalsecrets/v1alpha1"
@@ -142,8 +141,8 @@ func TestPushSecret(t *testing.T) {
 				Name: "foo",
 			}, nil, nil),
 			getPublicKeyFn: withGetPublicKeyFn(&github.PublicKey{
-				Key:   ptr.To("broken"),
-				KeyID: ptr.To("123"),
+				Key:   new("broken"),
+				KeyID: new("123"),
 			}, nil, nil),
 			wantErr: errors.New("unable to decode public key"),
 		},
@@ -153,8 +152,8 @@ func TestPushSecret(t *testing.T) {
 				Name: "foo",
 			}, nil, nil),
 			getPublicKeyFn: withGetPublicKeyFn(&github.PublicKey{
-				Key:   ptr.To("Cg=="),
-				KeyID: ptr.To("123"),
+				Key:   new("Cg=="),
+				KeyID: new("123"),
 			}, nil, nil),
 			secret: &corev1.Secret{
 				Data: map[string][]byte{
@@ -174,8 +173,8 @@ func TestPushSecret(t *testing.T) {
 				Name: "foo",
 			}, nil, nil),
 			getPublicKeyFn: withGetPublicKeyFn(&github.PublicKey{
-				Key:   ptr.To("Zm9vYmFyCg=="),
-				KeyID: ptr.To("123"),
+				Key:   new("Zm9vYmFyCg=="),
+				KeyID: new("123"),
 			}, nil, nil),
 			secret: &corev1.Secret{
 				Data: map[string][]byte{
@@ -196,8 +195,8 @@ func TestPushSecret(t *testing.T) {
 				Name: "foo",
 			}, nil, nil),
 			getPublicKeyFn: withGetPublicKeyFn(&github.PublicKey{
-				Key:   ptr.To("Zm9vYmFyCg=="),
-				KeyID: ptr.To("123"),
+				Key:   new("Zm9vYmFyCg=="),
+				KeyID: new("123"),
 			}, nil, nil),
 			secret: &corev1.Secret{
 				Data: map[string][]byte{

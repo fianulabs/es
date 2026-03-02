@@ -146,7 +146,7 @@ func (kms *KeyManagementService) NewClient(ctx context.Context, store esv1.Gener
 	}
 
 	config := &openapi.Config{
-		RegionId:   utils.Ptr(alibabaSpec.RegionID),
+		RegionId:   new(alibabaSpec.RegionID),
 		Credential: credentials,
 	}
 
@@ -175,8 +175,8 @@ func newOptions(store esv1.GenericStore) *util.RuntimeOptions {
 			retryAmount = 3
 		}
 
-		options.Autoretry = utils.Ptr(true)
-		options.MaxAttempts = utils.Ptr(retryAmount)
+		options.Autoretry = new(true)
+		options.MaxAttempts = new(retryAmount)
 	}
 
 	return options
@@ -215,9 +215,9 @@ func newRRSAAuth(store esv1.GenericStore) (credential.Credential, error) {
 		OIDCTokenFilePath: &alibabaSpec.Auth.RRSAAuth.OIDCTokenFilePath,
 		RoleArn:           &alibabaSpec.Auth.RRSAAuth.RoleARN,
 		RoleSessionName:   &alibabaSpec.Auth.RRSAAuth.SessionName,
-		Type:              utils.Ptr("oidc_role_arn"),
-		ConnectTimeout:    utils.Ptr(30 * 1000),
-		Timeout:           utils.Ptr(60 * 1000),
+		Type:              new("oidc_role_arn"),
+		ConnectTimeout:    new(30 * 1000),
+		Timeout:           new(60 * 1000),
 	}
 
 	return credential.NewCredential(credentialConfig)
@@ -236,11 +236,11 @@ func newAccessKeyAuth(ctx context.Context, kube kclient.Client, store esv1.Gener
 		return nil, fmt.Errorf(errFetchAccessKeySecret, err)
 	}
 	credentialConfig := &credential.Config{
-		AccessKeyId:     utils.Ptr(accessKeyID),
-		AccessKeySecret: utils.Ptr(accessKeySecret),
-		Type:            utils.Ptr("access_key"),
-		ConnectTimeout:  utils.Ptr(30),
-		Timeout:         utils.Ptr(60),
+		AccessKeyId:     new(accessKeyID),
+		AccessKeySecret: new(accessKeySecret),
+		Type:            new("access_key"),
+		ConnectTimeout:  new(30),
+		Timeout:         new(60),
 	}
 
 	return credential.NewCredential(credentialConfig)

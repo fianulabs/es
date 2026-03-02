@@ -58,7 +58,7 @@ type args struct {
 	Response   string `json:"response,omitempty"`
 	StatusCode int    `json:"statuscode,omitempty"`
 	PushSecret bool   `json:"pushsecret,omitempty"`
-	Secret     secret `json:"secret,omitempty"`
+	Secret     secret `json:"secret"`
 }
 
 type want struct {

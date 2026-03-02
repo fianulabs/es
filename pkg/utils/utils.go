@@ -81,9 +81,7 @@ func JSONMarshal(t any) ([]byte, error) {
 
 // MergeByteMap merges map of byte slices.
 func MergeByteMap(dst, src map[string][]byte) map[string][]byte {
-	for k, v := range src {
-		dst[k] = v
-	}
+	maps.Copy(dst, src)
 	return dst
 }
 
@@ -401,9 +399,7 @@ func reverse(strategy esv1alpha1.PushSecretConversionStrategy, str string) strin
 
 // MergeStringMap performs a deep clone from src to dest.
 func MergeStringMap(dest, src map[string]string) {
-	for k, v := range src {
-		dest[k] = v
-	}
+	maps.Copy(dest, src)
 }
 
 var (
@@ -452,7 +448,7 @@ func IsNil(i any) bool {
 		return true
 	}
 	value := reflect.ValueOf(i)
-	if value.Type().Kind() == reflect.Ptr {
+	if value.Type().Kind() == reflect.Pointer {
 		return value.IsNil()
 	}
 	return false
@@ -565,8 +561,9 @@ func Deref[V any](v *V) V {
 	return *v
 }
 
+//go:fix inline
 func Ptr[T any](i T) *T {
-	return &i
+	return new(i)
 }
 
 func ConvertToType[T any](obj any) (T, error) {
@@ -864,7 +861,7 @@ func CheckEndpointSlicesReady(ctx context.Context, c client.Client, svcName, svc
 }
 
 // ParseJWTClaims extracts claims from a JWT token string.
-func ParseJWTClaims(tokenString string) (map[string]interface{}, error) {
+func ParseJWTClaims(tokenString string) (map[string]any, error) {
 	// Split the token into its three parts
 	parts := strings.Split(tokenString, ".")
 	if len(parts) != 3 {
@@ -877,7 +874,7 @@ func ParseJWTClaims(tokenString string) (map[string]interface{}, error) {
 		return nil, fmt.Errorf("error decoding payload: %w", err)
 	}
 
-	var claims map[string]interface{}
+	var claims map[string]any
 	if err := json.Unmarshal(payload, &claims); err != nil {
 		return nil, fmt.Errorf("error un-marshaling claims: %w", err)
 	}

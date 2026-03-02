@@ -102,16 +102,16 @@ type secretResponseSecrets struct {
 }
 
 type secretResponseBodyData struct {
-	Project     secretResponseBodyObject `json:"project,omitempty"`
-	Environment secretResponseBodyObject `json:"environment,omitempty"`
-	Team        secretResponseBodyObject `json:"team,omitempty"`
+	Project     secretResponseBodyObject `json:"project"`
+	Environment secretResponseBodyObject `json:"environment"`
+	Team        secretResponseBodyObject `json:"team"`
 	Secrets     []secretResponseSecrets  `json:"secrets,omitempty"`
 	Status      string                   `json:"status"`
 	Message     string                   `json:"string"`
 }
 
 type secretResponseBody struct {
-	Data    secretResponseBodyData `json:"data,omitempty"`
+	Data    secretResponseBodyData `json:"data"`
 	Message string                 `json:"message,omitempty"`
 	Status  string                 `json:"status,omitempty"`
 }

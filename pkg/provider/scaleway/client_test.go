@@ -26,7 +26,6 @@ import (
 
 	esv1 "github.com/external-secrets/external-secrets/apis/externalsecrets/v1"
 	testingfake "github.com/external-secrets/external-secrets/pkg/provider/testing/fake"
-	"github.com/external-secrets/external-secrets/pkg/utils"
 )
 
 var db = buildDB(&fakeSecretAPI{
@@ -381,7 +380,7 @@ func TestGetAllSecrets(t *testing.T) {
 		},
 		"find secrets by path": {
 			ref: esv1.ExternalSecretFind{
-				Path: utils.Ptr("/subpath"),
+				Path: new("/subpath"),
 			},
 			response: map[string][]byte{
 				db.secret("nested-secret").name: db.secret("nested-secret").mustGetVersion("latest_enabled").data,

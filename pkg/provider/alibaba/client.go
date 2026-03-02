@@ -63,7 +63,7 @@ func newClient(config *openapi.Config, options *util.RuntimeOptions) (*secretsMa
 		return nil, fmt.Errorf("failed to create Alibaba KMS client: %w", err)
 	}
 
-	endpoint, err := kmsClient.GetEndpoint(tea.String("kms"), kmsClient.RegionId, kmsClient.EndpointRule, kmsClient.Network, kmsClient.Suffix, kmsClient.EndpointMap, kmsClient.Endpoint)
+	endpoint, err := kmsClient.GetEndpoint(new("kms"), kmsClient.RegionId, kmsClient.EndpointRule, kmsClient.Network, kmsClient.Suffix, kmsClient.EndpointMap, kmsClient.Endpoint)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get KMS endpoint: %w", err)
 	}
@@ -138,7 +138,7 @@ func (s *secretsManagerClient) doAPICall(ctx context.Context,
 		apiRequest.query["SecurityToken"] = creds.SecurityToken
 	}
 
-	apiRequest.query["Signature"] = openapiutil.GetRPCSignature(apiRequest.query, utils.Ptr(apiRequest.method.String()), creds.AccessKeySecret)
+	apiRequest.query["Signature"] = openapiutil.GetRPCSignature(apiRequest.query, new(apiRequest.method.String()), creds.AccessKeySecret)
 
 	httpReq, err := newHTTPRequestWithContext(ctx, apiRequest)
 	if err != nil {
@@ -157,7 +157,7 @@ func (s *secretsManagerClient) doAPICall(ctx context.Context,
 }
 
 func (s *secretsManagerClient) parseResponse(resp *http.Response) (map[string]any, error) {
-	statusCode := utils.Ptr(resp.StatusCode)
+	statusCode := new(resp.StatusCode)
 	if utils.Deref(util.Is4xx(statusCode)) || utils.Deref(util.Is5xx(statusCode)) {
 		return nil, s.parseErrorResponse(resp)
 	}
@@ -186,7 +186,7 @@ func (s *secretsManagerClient) parseErrorResponse(resp *http.Response) error {
 		return err
 	}
 
-	errorMap["statusCode"] = utils.Ptr(resp.StatusCode)
+	errorMap["statusCode"] = new(resp.StatusCode)
 	err = tea.NewSDKError(map[string]any{
 		"code":               tea.ToString(defaultAny(errorMap["Code"], errorMap["code"])),
 		"message":            fmt.Sprintf("code: %s, %s", tea.ToString(resp.StatusCode), tea.ToString(defaultAny(errorMap["Message"], errorMap["message"]))),
@@ -224,18 +224,18 @@ func newOpenAPIRequest(endpoint string,
 		method:   method,
 		headers: map[string]*string{
 			"host":          &endpoint,
-			"x-acs-version": utils.Ptr(kmsAPIVersion),
+			"x-acs-version": new(kmsAPIVersion),
 			"x-acs-action":  &action,
-			"user-agent":    utils.Ptr(fmt.Sprintf("AlibabaCloud (%s; %s) Golang/%s Core/%s TeaDSL/1", runtime.GOOS, runtime.GOARCH, strings.Trim(runtime.Version(), "go"), "0.01")),
+			"user-agent":    new(fmt.Sprintf("AlibabaCloud (%s; %s) Golang/%s Core/%s TeaDSL/1", runtime.GOOS, runtime.GOARCH, strings.Trim(runtime.Version(), "go"), "0.01")),
 		},
 		query: map[string]*string{
 			"Action":           &action,
-			"Format":           utils.Ptr("json"),
-			"Version":          utils.Ptr(kmsAPIVersion),
+			"Format":           new("json"),
+			"Version":          new(kmsAPIVersion),
 			"Timestamp":        openapiutil.GetTimestamp(),
 			"SignatureNonce":   util.GetNonce(),
-			"SignatureMethod":  utils.Ptr("HMAC-SHA1"),
-			"SignatureVersion": utils.Ptr("1.0"),
+			"SignatureMethod":  new("HMAC-SHA1"),
+			"SignatureVersion": new("1.0"),
 		},
 	}
 

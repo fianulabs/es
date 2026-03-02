@@ -17,6 +17,8 @@ limitations under the License.
 package cpsmetrics
 
 import (
+	"maps"
+
 	"github.com/prometheus/client_golang/prometheus"
 	v1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/metrics"
@@ -68,9 +70,7 @@ func UpdateClusterPushSecretCondition(ces *v1alpha1.ClusterPushSecret, condition
 
 	cesInfo := make(map[string]string)
 	cesInfo["name"] = ces.Name
-	for k, v := range ces.Labels {
-		cesInfo[k] = v
-	}
+	maps.Copy(cesInfo, ces.Labels)
 	conditionLabels := ctrlmetrics.RefineConditionMetricLabels(cesInfo)
 	ClusterPushSecretCondition := GetGaugeVec(ClusterPushSecretStatusConditionKey)
 

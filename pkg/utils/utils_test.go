@@ -758,7 +758,7 @@ func TestRewriteMerge(t *testing.T) {
 				"mongo-credentials": []byte(`{"username": "foz", "password": "baz"}`),
 				"redis-credentials": []byte(`{"host": "redis.example.com", "port": "6379"}`),
 				"credentials": func() []byte {
-					expected := map[string]interface{}{
+					expected := map[string]any{
 						"username": "foz",
 						"password": "baz",
 						"host":     "redis.example.com",
@@ -1123,7 +1123,7 @@ func TestValidateSecretSelector(t *testing.T) {
 				},
 			},
 			ref: esmetav1.SecretKeySelector{
-				Namespace: Ptr("test"),
+				Namespace: new("test"),
 			},
 			expected: nil,
 		},
@@ -1148,7 +1148,7 @@ func TestValidateSecretSelector(t *testing.T) {
 				},
 			},
 			ref: esmetav1.SecretKeySelector{
-				Namespace: Ptr("test"),
+				Namespace: new("test"),
 			},
 			expected: nil,
 		},
@@ -1173,7 +1173,7 @@ func TestValidateSecretSelector(t *testing.T) {
 				},
 			},
 			ref: esmetav1.SecretKeySelector{
-				Namespace: Ptr("different"),
+				Namespace: new("different"),
 			},
 			expected: errNamespaceNotAllowed,
 		},
@@ -1205,7 +1205,7 @@ func TestValidateReferentSecretSelector(t *testing.T) {
 				},
 			},
 			ref: esmetav1.SecretKeySelector{
-				Namespace: Ptr("test"),
+				Namespace: new("test"),
 			},
 			expected: nil,
 		},
@@ -1230,7 +1230,7 @@ func TestValidateReferentSecretSelector(t *testing.T) {
 				},
 			},
 			ref: esmetav1.SecretKeySelector{
-				Namespace: Ptr("test"),
+				Namespace: new("test"),
 			},
 			expected: nil,
 		},
@@ -1245,7 +1245,7 @@ func TestValidateReferentSecretSelector(t *testing.T) {
 				},
 			},
 			ref: esmetav1.SecretKeySelector{
-				Namespace: Ptr("different"),
+				Namespace: new("different"),
 			},
 			expected: errNamespaceNotAllowed,
 		},
@@ -1277,7 +1277,7 @@ func TestValidateServiceAccountSelector(t *testing.T) {
 				},
 			},
 			ref: esmetav1.ServiceAccountSelector{
-				Namespace: Ptr("test"),
+				Namespace: new("test"),
 			},
 			expected: nil,
 		},
@@ -1302,7 +1302,7 @@ func TestValidateServiceAccountSelector(t *testing.T) {
 				},
 			},
 			ref: esmetav1.ServiceAccountSelector{
-				Namespace: Ptr("test"),
+				Namespace: new("test"),
 			},
 			expected: nil,
 		},
@@ -1327,7 +1327,7 @@ func TestValidateServiceAccountSelector(t *testing.T) {
 				},
 			},
 			ref: esmetav1.ServiceAccountSelector{
-				Namespace: Ptr("different"),
+				Namespace: new("different"),
 			},
 			expected: errNamespaceNotAllowed,
 		},
@@ -1359,7 +1359,7 @@ func TestValidateReferentServiceAccountSelector(t *testing.T) {
 				},
 			},
 			ref: esmetav1.ServiceAccountSelector{
-				Namespace: Ptr("test"),
+				Namespace: new("test"),
 			},
 			expected: nil,
 		},
@@ -1384,7 +1384,7 @@ func TestValidateReferentServiceAccountSelector(t *testing.T) {
 				},
 			},
 			ref: esmetav1.ServiceAccountSelector{
-				Namespace: Ptr("test"),
+				Namespace: new("test"),
 			},
 			expected: nil,
 		},
@@ -1399,7 +1399,7 @@ func TestValidateReferentServiceAccountSelector(t *testing.T) {
 				},
 			},
 			ref: esmetav1.ServiceAccountSelector{
-				Namespace: Ptr("different"),
+				Namespace: new("different"),
 			},
 			expected: errNamespaceNotAllowed,
 		},
