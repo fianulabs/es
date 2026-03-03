@@ -151,10 +151,10 @@ func (g *gitlabBase) GetAllSecrets(_ context.Context, ref esv1.ExternalSecretFin
 }
 
 func (g *gitlabBase) fetchProjectVariables(effectiveEnvironment string, matcher *find.Matcher, secretData map[string][]byte) error {
-	var popts = &gitlab.ListProjectVariablesOptions{PerPage: 100}
+	var popts = &gitlab.ListProjectVariablesOptions{gitlab.ListOptions{PerPage: 100}}
 	nonWildcardSet := make(map[string]bool)
 	for projectPage := 1; ; projectPage++ {
-		popts.Page = projectPage
+		popts.Page = int64(projectPage)
 		projectData, response, err := g.projectVariablesClient.ListVariables(g.store.ProjectID, popts)
 		metrics.ObserveAPICall(constants.ProviderGitLab, constants.CallGitLabProjectListVariables, err)
 		if err != nil {
@@ -193,7 +193,7 @@ func processProjectVariables(
 }
 
 func (g *gitlabBase) fetchSecretData(effectiveEnvironment string, matcher *find.Matcher) (map[string][]byte, error) {
-	var gopts = &gitlab.ListGroupVariablesOptions{PerPage: 100}
+	var gopts = &gitlab.ListGroupVariablesOptions{gitlab.ListOptions{PerPage: 100}}
 	secretData := make(map[string][]byte)
 	for _, groupID := range g.store.GroupIDs {
 		if err := g.setVariablesForGroupID(effectiveEnvironment, matcher, gopts, groupID, secretData); err != nil {
@@ -212,7 +212,7 @@ func (g *gitlabBase) setVariablesForGroupID(
 	secretData map[string][]byte,
 ) error {
 	for groupPage := 1; ; groupPage++ {
-		gopts.Page = groupPage
+		gopts.Page = int64(groupPage)
 		groupVars, response, err := g.groupVariablesClient.ListVariables(groupID, gopts)
 		metrics.ObserveAPICall(constants.ProviderGitLab, constants.CallGitLabGroupListVariables, err)
 		if err != nil {
@@ -419,7 +419,7 @@ func (g *gitlabBase) ResolveGroupIds() error {
 		sort.Sort(ProjectGroupPathSorter(projectGroups))
 		discoveredIds := make([]string, len(projectGroups))
 		for i, group := range projectGroups {
-			discoveredIds[i] = strconv.Itoa(group.ID)
+			discoveredIds[i] = strconv.Itoa(int(group.ID))
 		}
 		g.store.GroupIDs = discoveredIds
 	}
