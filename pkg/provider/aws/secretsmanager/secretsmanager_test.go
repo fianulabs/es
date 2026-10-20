@@ -527,6 +527,26 @@ func TestSetSecret(t *testing.T) {
 				}`)}}
 	pushSecretDataWithProperty := fake.PushSecretData{SecretKey: secretKey, RemoteKey: fakeKey, Property: "other-fake-property"}
 
+	scheduledForDeletion := &awssm.DescribeSecretOutput{
+		ARN:         &arn,
+		Tags:        externalSecretsTag,
+		DeletedDate: new(time.Now()),
+		VersionIdsToStages: map[string][]string{
+			defaultVersion: {"AWSCURRENT"},
+		},
+	}
+	restored := false
+	readUnlessRestored := func(context.Context, *awssm.GetSecretValueInput, ...func(*awssm.Options)) (*awssm.GetSecretValueOutput, error) {
+		if !restored {
+			return nil, &types.InvalidRequestException{Message: new("You can't perform this operation on the secret because it was marked for deletion.")}
+		}
+		return secretValueOutput, nil
+	}
+	restoreSecret := func(context.Context, *awssm.RestoreSecretInput, ...func(*awssm.Options)) (*awssm.RestoreSecretOutput, error) {
+		restored = true
+		return &awssm.RestoreSecretOutput{ARN: &arn}, nil
+	}
+
 	type args struct {
 		store          *esv1.AWSProvider
 		client         fakesm.Client
@@ -557,6 +577,40 @@ func TestSetSecret(t *testing.T) {
 			},
 			want: want{
 				err: nil,
+			},
+		},
+		"SetSecretRestoresSecretScheduledForDeletion": {
+			reason: "a push to a secret scheduled for deletion restores it, then writes the value",
+			args: args{
+				store: makeValidSecretStore().Spec.Provider.AWS,
+				client: fakesm.Client{
+					GetSecretValueFn: readUnlessRestored,
+					RestoreSecretFn:  restoreSecret,
+					PutSecretValueFn: fakesm.NewPutSecretValueFn(putSecretOutput, nil),
+					DescribeSecretFn: fakesm.NewDescribeSecretFn(scheduledForDeletion, nil),
+					TagResourceFn:    fakesm.NewTagResourceFn(&awssm.TagResourceOutput{}, nil),
+					UntagResourceFn:  fakesm.NewUntagResourceFn(&awssm.UntagResourceOutput{}, nil),
+				},
+				pushSecretData: pushSecretDataWithoutProperty,
+			},
+			want: want{
+				err: nil,
+			},
+		},
+		"SetSecretFailsWhenRestoreFails": {
+			reason: "a push to a secret scheduled for deletion fails when the restore is refused",
+			args: args{
+				store: makeValidSecretStore().Spec.Provider.AWS,
+				client: fakesm.Client{
+					RestoreSecretFn: func(context.Context, *awssm.RestoreSecretInput, ...func(*awssm.Options)) (*awssm.RestoreSecretOutput, error) {
+						return nil, noPermission
+					},
+					DescribeSecretFn: fakesm.NewDescribeSecretFn(scheduledForDeletion, nil),
+				},
+				pushSecretData: pushSecretDataWithoutProperty,
+			},
+			want: want{
+				err: noPermission,
 			},
 		},
 		"SetSecretSucceedsWithExistingSecretButNoSecretVersionsWithoutProperty": {

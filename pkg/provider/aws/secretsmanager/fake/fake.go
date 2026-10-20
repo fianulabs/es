@@ -41,6 +41,7 @@ type Client struct {
 	BatchGetSecretValueFn BatchGetSecretValueFn
 	TagResourceFn         TagResourceFn
 	UntagResourceFn       UntagResourceFn
+	RestoreSecretFn       RestoreSecretFn
 }
 type CreateSecretFn func(context.Context, *awssm.CreateSecretInput, ...func(*awssm.Options)) (*awssm.CreateSecretOutput, error)
 type GetSecretValueFn func(context.Context, *awssm.GetSecretValueInput, ...func(*awssm.Options)) (*awssm.GetSecretValueOutput, error)
@@ -51,6 +52,8 @@ type ListSecretsFn func(context.Context, *awssm.ListSecretsInput, ...func(*awssm
 type BatchGetSecretValueFn func(context.Context, *awssm.BatchGetSecretValueInput, ...func(*awssm.Options)) (*awssm.BatchGetSecretValueOutput, error)
 
 type TagResourceFn func(context.Context, *awssm.TagResourceInput, ...func(*awssm.Options)) (*awssm.TagResourceOutput, error)
+type RestoreSecretFn func(context.Context, *awssm.RestoreSecretInput, ...func(*awssm.Options)) (*awssm.RestoreSecretOutput, error)
+
 type UntagResourceFn func(context.Context, *awssm.UntagResourceInput, ...func(*awssm.Options)) (*awssm.UntagResourceOutput, error)
 
 func (sm *Client) CreateSecret(ctx context.Context, input *awssm.CreateSecretInput, options ...func(*awssm.Options)) (*awssm.CreateSecretOutput, error) {
@@ -220,4 +223,8 @@ func NewUntagResourceFn(output *awssm.UntagResourceOutput, err error, aFunc ...f
 		}
 		return output, err
 	}
+}
+
+func (sm *Client) RestoreSecret(ctx context.Context, params *awssm.RestoreSecretInput, optFuncs ...func(*awssm.Options)) (*awssm.RestoreSecretOutput, error) {
+	return sm.RestoreSecretFn(ctx, params, optFuncs...)
 }
