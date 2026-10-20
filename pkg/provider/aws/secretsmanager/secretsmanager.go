@@ -86,6 +86,7 @@ type SMInterface interface {
 	DeleteSecret(ctx context.Context, params *awssm.DeleteSecretInput, optFuncs ...func(*awssm.Options)) (*awssm.DeleteSecretOutput, error)
 	TagResource(ctx context.Context, params *awssm.TagResourceInput, optFuncs ...func(*awssm.Options)) (*awssm.TagResourceOutput, error)
 	UntagResource(ctx context.Context, params *awssm.UntagResourceInput, optFuncs ...func(*awssm.Options)) (*awssm.UntagResourceOutput, error)
+	RestoreSecret(ctx context.Context, params *awssm.RestoreSecretInput, optFuncs ...func(*awssm.Options)) (*awssm.RestoreSecretOutput, error)
 }
 
 const (
@@ -234,6 +235,16 @@ func (sm *SecretsManager) PushSecret(ctx context.Context, secret *corev1.Secret,
 		return err
 	} else if !isManagedByESO(describeSecretOutput) {
 		return errors.New("secret not managed by external-secrets")
+	}
+
+	// A secret scheduled for deletion refuses reads and writes until restored.
+	// Pushing to it means the caller wants it back, so restore it first.
+	if describeSecretOutput.DeletedDate != nil {
+		_, err := sm.client.RestoreSecret(ctx, &awssm.RestoreSecretInput{SecretId: &secretName})
+		metrics.ObserveAPICall(constants.ProviderAWSSM, constants.CallAWSSMRestoreSecret, err)
+		if err != nil {
+			return fmt.Errorf("restore secret scheduled for deletion: %w", err)
+		}
 	}
 
 	if len(describeSecretOutput.VersionIdsToStages) == 0 {
