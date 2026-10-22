@@ -29,6 +29,7 @@ const (
 	CallAWSSMUntagResource       = "UntagResource"
 	CallAWSSMTagResource         = "TagResource"
 	CallAWSSMRestoreSecret       = "RestoreSecret"
+	CallAWSSMRemoveRegions       = "RemoveRegionsFromReplication"
 
 	ProviderAWSPS                = "AWS/ParameterStore"
 	CallAWSPSGetParameter        = "GetParameter"
