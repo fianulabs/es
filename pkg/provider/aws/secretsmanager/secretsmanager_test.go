@@ -1087,6 +1087,15 @@ func TestDeleteSecret(t *testing.T) {
 		Key:   &managed,
 		Value: &manager,
 	}
+	replicatedARN := "arn:aws:secretsmanager:us-east-2:123456789012:secret:replicated-AbCdEf"
+	replicatedDescribe := &awssm.DescribeSecretOutput{
+		Tags: []types.Tag{secretTag},
+		ReplicationStatus: []types.ReplicationStatusType{
+			{Region: aws.String("us-west-2")},
+			{Region: aws.String("eu-west-1")},
+		},
+	}
+	removeRegionsCalled := false
 	type args struct {
 		client               fakesm.Client
 		config               esv1.SecretsManager
@@ -1309,6 +1318,58 @@ func TestDeleteSecret(t *testing.T) {
 				err: nil,
 			},
 			reason: "Verifies that the prefix is correctly applied when deleting a secret",
+		},
+		"Removes replica regions before deleting a replicated secret": {
+			args: args{
+				client: fakesm.Client{
+					RemoveRegionsFn: func(ctx context.Context, input *awssm.RemoveRegionsFromReplicationInput, opts ...func(*awssm.Options)) (*awssm.RemoveRegionsFromReplicationOutput, error) {
+						if aws.ToString(input.SecretId) != replicatedARN {
+							return nil, fmt.Errorf("expected SecretId %s, got %s", replicatedARN, aws.ToString(input.SecretId))
+						}
+						want := []string{"us-west-2", "eu-west-1"}
+						if !reflect.DeepEqual(input.RemoveReplicaRegions, want) {
+							return nil, fmt.Errorf("expected regions %v, got %v", want, input.RemoveReplicaRegions)
+						}
+						removeRegionsCalled = true
+						return &awssm.RemoveRegionsFromReplicationOutput{}, nil
+					},
+					DeleteSecretFn: func(ctx context.Context, input *awssm.DeleteSecretInput, opts ...func(*awssm.Options)) (*awssm.DeleteSecretOutput, error) {
+						if !removeRegionsCalled {
+							return nil, errors.New("DeleteSecret called before RemoveRegionsFromReplication")
+						}
+						if aws.ToString(input.SecretId) != replicatedARN {
+							return nil, fmt.Errorf("expected SecretId %s, got %s", replicatedARN, aws.ToString(input.SecretId))
+						}
+						return &awssm.DeleteSecretOutput{}, nil
+					},
+				},
+				config:               esv1.SecretsManager{},
+				getSecretOutput:      &awssm.GetSecretValueOutput{ARN: aws.String(replicatedARN)},
+				describeSecretOutput: replicatedDescribe,
+			},
+			want: want{
+				err: nil,
+			},
+			reason: "A replicated primary must drop its replicas before DeleteSecret, or AWS rejects the delete",
+		},
+		"RemoveRegionsFromReplication error is returned and DeleteSecret is skipped": {
+			args: args{
+				client: fakesm.Client{
+					RemoveRegionsFn: func(ctx context.Context, input *awssm.RemoveRegionsFromReplicationInput, opts ...func(*awssm.Options)) (*awssm.RemoveRegionsFromReplicationOutput, error) {
+						return nil, errors.New("remove regions failed")
+					},
+					DeleteSecretFn: func(ctx context.Context, input *awssm.DeleteSecretInput, opts ...func(*awssm.Options)) (*awssm.DeleteSecretOutput, error) {
+						return nil, errors.New("DeleteSecret must not be called after RemoveRegionsFromReplication fails")
+					},
+				},
+				config:               esv1.SecretsManager{},
+				getSecretOutput:      &awssm.GetSecretValueOutput{ARN: aws.String(replicatedARN)},
+				describeSecretOutput: replicatedDescribe,
+			},
+			want: want{
+				err: errors.New("remove regions failed"),
+			},
+			reason: "A failed replica removal must abort the delete",
 		},
 	}
 	for name, tc := range tests {

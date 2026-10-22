@@ -87,6 +87,7 @@ type SMInterface interface {
 	TagResource(ctx context.Context, params *awssm.TagResourceInput, optFuncs ...func(*awssm.Options)) (*awssm.TagResourceOutput, error)
 	UntagResource(ctx context.Context, params *awssm.UntagResourceInput, optFuncs ...func(*awssm.Options)) (*awssm.UntagResourceOutput, error)
 	RestoreSecret(ctx context.Context, params *awssm.RestoreSecretInput, optFuncs ...func(*awssm.Options)) (*awssm.RestoreSecretOutput, error)
+	RemoveRegionsFromReplication(ctx context.Context, params *awssm.RemoveRegionsFromReplicationInput, optFuncs ...func(*awssm.Options)) (*awssm.RemoveRegionsFromReplicationOutput, error)
 }
 
 const (
@@ -168,6 +169,24 @@ func (sm *SecretsManager) DeleteSecret(ctx context.Context, remoteRef esv1.PushS
 	}
 	if !isManagedByESO(data) {
 		return nil
+	}
+	// AWS rejects DeleteSecret on a primary secret that still has replicas,
+	// so drop every replica region first.
+	if len(data.ReplicationStatus) > 0 {
+		regions := make([]string, 0, len(data.ReplicationStatus))
+		for _, rs := range data.ReplicationStatus {
+			if rs.Region != nil {
+				regions = append(regions, *rs.Region)
+			}
+		}
+		_, err = sm.client.RemoveRegionsFromReplication(ctx, &awssm.RemoveRegionsFromReplicationInput{
+			SecretId:             awsSecret.ARN,
+			RemoveReplicaRegions: regions,
+		})
+		metrics.ObserveAPICall(constants.ProviderAWSSM, constants.CallAWSSMRemoveRegions, err)
+		if err != nil {
+			return err
+		}
 	}
 	deleteInput := &awssm.DeleteSecretInput{
 		SecretId: awsSecret.ARN,

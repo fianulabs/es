@@ -42,6 +42,7 @@ type Client struct {
 	TagResourceFn         TagResourceFn
 	UntagResourceFn       UntagResourceFn
 	RestoreSecretFn       RestoreSecretFn
+	RemoveRegionsFn       RemoveRegionsFn
 }
 type CreateSecretFn func(context.Context, *awssm.CreateSecretInput, ...func(*awssm.Options)) (*awssm.CreateSecretOutput, error)
 type GetSecretValueFn func(context.Context, *awssm.GetSecretValueInput, ...func(*awssm.Options)) (*awssm.GetSecretValueOutput, error)
@@ -53,6 +54,7 @@ type BatchGetSecretValueFn func(context.Context, *awssm.BatchGetSecretValueInput
 
 type TagResourceFn func(context.Context, *awssm.TagResourceInput, ...func(*awssm.Options)) (*awssm.TagResourceOutput, error)
 type RestoreSecretFn func(context.Context, *awssm.RestoreSecretInput, ...func(*awssm.Options)) (*awssm.RestoreSecretOutput, error)
+type RemoveRegionsFn func(context.Context, *awssm.RemoveRegionsFromReplicationInput, ...func(*awssm.Options)) (*awssm.RemoveRegionsFromReplicationOutput, error)
 
 type UntagResourceFn func(context.Context, *awssm.UntagResourceInput, ...func(*awssm.Options)) (*awssm.UntagResourceOutput, error)
 
@@ -227,4 +229,8 @@ func NewUntagResourceFn(output *awssm.UntagResourceOutput, err error, aFunc ...f
 
 func (sm *Client) RestoreSecret(ctx context.Context, params *awssm.RestoreSecretInput, optFuncs ...func(*awssm.Options)) (*awssm.RestoreSecretOutput, error) {
 	return sm.RestoreSecretFn(ctx, params, optFuncs...)
+}
+
+func (sm *Client) RemoveRegionsFromReplication(ctx context.Context, params *awssm.RemoveRegionsFromReplicationInput, optFuncs ...func(*awssm.Options)) (*awssm.RemoveRegionsFromReplicationOutput, error) {
+	return sm.RemoveRegionsFn(ctx, params, optFuncs...)
 }
