@@ -170,8 +170,22 @@ func (sm *SecretsManager) DeleteSecret(ctx context.Context, remoteRef esv1.PushS
 	if !isManagedByESO(data) {
 		return nil
 	}
+	deleteInput := &awssm.DeleteSecretInput{
+		SecretId: awsSecret.ARN,
+	}
+	if sm.config != nil && sm.config.ForceDeleteWithoutRecovery {
+		deleteInput.ForceDeleteWithoutRecovery = &sm.config.ForceDeleteWithoutRecovery
+	}
+	if sm.config != nil && sm.config.RecoveryWindowInDays > 0 {
+		deleteInput.RecoveryWindowInDays = &sm.config.RecoveryWindowInDays
+	}
+	err = util.ValidateDeleteSecretInput(*deleteInput)
+	if err != nil {
+		return err
+	}
 	// AWS rejects DeleteSecret on a primary secret that still has replicas,
-	// so drop every replica region first.
+	// so drop every replica region first (after validation, so a rejected
+	// delete never loses its replicas).
 	if len(data.ReplicationStatus) > 0 {
 		regions := make([]string, 0, len(data.ReplicationStatus))
 		for _, rs := range data.ReplicationStatus {
@@ -187,19 +201,6 @@ func (sm *SecretsManager) DeleteSecret(ctx context.Context, remoteRef esv1.PushS
 		if err != nil {
 			return err
 		}
-	}
-	deleteInput := &awssm.DeleteSecretInput{
-		SecretId: awsSecret.ARN,
-	}
-	if sm.config != nil && sm.config.ForceDeleteWithoutRecovery {
-		deleteInput.ForceDeleteWithoutRecovery = &sm.config.ForceDeleteWithoutRecovery
-	}
-	if sm.config != nil && sm.config.RecoveryWindowInDays > 0 {
-		deleteInput.RecoveryWindowInDays = &sm.config.RecoveryWindowInDays
-	}
-	err = util.ValidateDeleteSecretInput(*deleteInput)
-	if err != nil {
-		return err
 	}
 	_, err = sm.client.DeleteSecret(ctx, deleteInput)
 	metrics.ObserveAPICall(constants.ProviderAWSSM, constants.CallAWSSMDeleteSecret, err)
